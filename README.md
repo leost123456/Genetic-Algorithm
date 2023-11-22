@@ -40,8 +40,8 @@ def eq_constraints(X):
 
 if __name__ == '__main__':
     varbound = np.array([[0,100], [0, 100]])  # 变量值域范围
-    vartype = np.array([['real'],['real']])  # 变量类型
-    #vartype = np.array([['real'], ['int'], ['int']])  # 变量类型可选，如果01变量也是选择int，变量值域限制为01即可
+    #‘real’表示连续变量，‘int’表表示整型变量，如果01变量也是选择'int'，变量值域限制为01即可
+    vartype = np.array([['real'],['real']])  # 连续变量类型
 
     #默认是最小化目标函数
     model = ga(function=f, #目标函数
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
 最终的遗传算法迭代结果如下所示：
 
-![算法迭代图](./images/Algorithm iteration.png)
+![算法迭代图](./images/Algorithm_iteration.png)
 
 求解得到的最优解如下所示：
 
