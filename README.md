@@ -6,7 +6,7 @@
 
 ### :bookmark:**2.使用方法**
 
-1. 使用git clone https://github.com/leost123456/Genetic-Algorithm.git克隆到本地仓库，或者直接下载源码。
+1. 使用git clone https://github.com/leost123456/Genetic-Algorithm.git 克隆到本地仓库，或者直接下载源码。
 2. 进入目录终端输入指令pip install -r requirements.txt安装所需依赖。
 3. 利用该遗传算法代码库求解设置的规划模型即可。
 
