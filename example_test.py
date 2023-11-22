@@ -14,14 +14,13 @@ def ineq_constraints(X):
     cons1=X[1]-X[0]**2
     return [cons1]
 
-#设置等死约束（默认都是要小于等于0）
+#设置等式约束（默认都是要小于等于0）
 def eq_constraints(X):
     #约束2
     cons2=-X[0]-X[1]**2+2
     return [cons2] #组合成序列的形式
 
 if __name__ == '__main__':
-
     varbound = np.array([[0,100], [0, 100]])  # 变量值域范围
     vartype = np.array([['real'],['real']])  # 变量类型
     #vartype = np.array([['real'], ['int'], ['int']])  # 变量类型可选，如果01变量也是选择int，变量值域限制为01即可
