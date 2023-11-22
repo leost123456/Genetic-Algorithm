@@ -2,9 +2,9 @@
 可以解决任何类型问题，非线性规划、连续变量、整数变量、01变量均可（可以有等式和不等式约束条件）
 """
 import numpy as np
-from ga import geneticalgorithm as ga #该库经过了自己的修改
+from GA import GA
 
-#设置目标哈数
+#设置目标函数
 def f(X):
     return X[0]**2+X[1]**2+8
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     #vartype = np.array([['real'], ['int'], ['int']])  # 变量类型可选，如果01变量也是选择int，变量值域限制为01即可
 
     #默认是最小化目标函数
-    model = ga(function=f, #目标函数
+    model = GA(function=f, #目标函数
                dimension=2, #决策变量数量
                variable_type=vartype, #变量类型（序列形式，real,int）
                variable_boundaries=varbound, #各变量值域
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                max_iteration_without_improv=None, #多少轮没更新后退出
                convergence_curve=True, #是否绘制算法迭代收敛曲线
                progress_bar=True, #进度条显示
-               plot_path='.' #保存收敛曲线svg图像的路径
+               plot_path=None #保存收敛曲线svg图像的路径
                )
     model.run()
     #输出信息

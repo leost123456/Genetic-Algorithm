@@ -20,7 +20,7 @@
 
 ```python
 import numpy as np
-from ga import geneticalgorithm as ga #该库经过了自己的修改
+from GA import GA
 
 #设置目标哈数
 def f(X):

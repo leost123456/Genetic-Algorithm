@@ -34,7 +34,7 @@ from matplotlib import rcParams #导入包
 config = {"font.family":'Times New Roman'}  # 设置字体类型
 rcParams.update(config)    #进行更新配置
 
-class geneticalgorithm():
+class GA():
     def __init__(self, function, dimension,
                  variable_boundaries=None,
                  variable_type=None,
@@ -57,7 +57,7 @@ class geneticalgorithm():
 
         self.plot_path = plot_path  # 存储图像的路径
 
-        self.__name__ = geneticalgorithm
+        self.__name__ = GA
 
         #目标函数
         assert (callable(function)), "function must be callable"
