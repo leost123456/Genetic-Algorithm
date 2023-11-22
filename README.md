@@ -44,7 +44,7 @@ if __name__ == '__main__':
     vartype = np.array([['real'],['real']])  # 连续变量类型
 
     #默认是最小化目标函数
-    model = ga(function=f, #目标函数
+    model = GA(function=f, #目标函数
                dimension=2, #决策变量数量
                variable_type=vartype, #变量类型（序列形式，real,int）
                variable_boundaries=varbound, #各变量值域
