@@ -366,7 +366,7 @@ class GA():
         else:
             ineq_penalty=0
 
-        if self.eq_constraints is not None or self.ineq_constraints is not None:  # 没有约束条件时
+        if self.eq_constraints is not None or self.ineq_constraints is not None:  # 有约束条件时
             return eq_penalty+ineq_penalty
         else:
             return None
