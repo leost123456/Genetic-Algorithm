@@ -4,7 +4,7 @@
 import numpy as np
 from GA import GA
 
-#设置目标函数
+#设置目标哈数
 def f(X):
     return X[0]**2+X[1]**2+8
 
@@ -14,7 +14,7 @@ def ineq_constraints(X):
     cons1=X[1]-X[0]**2
     return [cons1]
 
-#设置等式约束（默认都是要小于等于0）
+#设置等式约束（右边为0）
 def eq_constraints(X):
     #约束2
     cons2=-X[0]-X[1]**2+2
@@ -33,10 +33,11 @@ if __name__ == '__main__':
                eq_constraints=eq_constraints, #等式约束函数
                ineq_constraints=ineq_constraints, #不等式约束函数
                function_timeout=10, #延时（函数没响应）
-               eq_cons_coefficient=0.001, #等式约束系数（值越小，等式约束越严格）
+               eq_cons_coefficient=0.001, #等式约束系数（值越小，等式约束越严格），如果有时候优化不到可行解，可以适当调大这个值
+               eq_optimezer='soft', #等式约束优化器（hard,soft）,可以都尝试，软约束有时候能优化到更好的最优值，但是有时候会无解或者不是可行解，硬约束会优先确保结果是可行解
                max_num_iteration=300, #最大迭代次数
                population_size=1000, #个体数量（初始解的数量）
-               penalty_factor=1, #惩罚因子（用于约束条件）,越大约束作用越大（要选择合适的值1比较合适）
+               penalty_factor=1, #惩罚因子（用于约束条件）,越大约束作用越大（要选择合适的值1比较合适,用于乘上比较0和约束输出，即允许）
                mutation_probability=0.1, #变异概率
                elit_ratio=0.01, #精英选择的比例（每轮都保留一定数量的较优目标函数的个体）
                crossover_probability=0.5, #交叉概率
@@ -45,7 +46,7 @@ if __name__ == '__main__':
                max_iteration_without_improv=None, #多少轮没更新后退出
                convergence_curve=True, #是否绘制算法迭代收敛曲线
                progress_bar=True, #进度条显示
-               plot_path=None #保存收敛曲线svg图像的路径
+               plot_path='.' #保存收敛曲线svg图像的路径
                )
     model.run()
     #输出信息

@@ -42,6 +42,7 @@ class GA():
                  ineq_constraints=None,
                  function_timeout=10,
                  eq_cons_coefficient=0.001,
+                 eq_optimezer='soft', #选用的等式约束优化方法（soft,hard），软约束有时候能优化到更好的最优值，但是有时候会无解或者不是可行解，硬约束会优先确保结果是可行解
                  max_num_iteration=None,
                  population_size=100,
                  penalty_factor=1,
@@ -72,6 +73,10 @@ class GA():
 
         #等式约束系数（用于限制等式约束）越小越严格
         self.eq_cons_coefficient=eq_cons_coefficient
+
+        #等式约束优化方法
+        self.eq_optimezer=eq_optimezer
+        assert self.eq_optimezer in ['soft','hard'],"eq_optimezer must be 'soft' or 'hard'"
 
         # 输入变量的类型（连续变量、整数变量）
         assert variable_type is not None,'Input variable type cannot be empty'
@@ -114,7 +119,7 @@ class GA():
         assert (parents_portion <= 1 and parents_portion >= 0),"parents_portion must be in range [0,1]"
         self.par_s = int(parents_portion * self.pop_s)  #下一代中保留的父代数量
         trl = self.pop_s - self.par_s
-        if trl % 2 != 0:
+        if trl % 2 != 0: #保证父代数量为偶数
             self.par_s += 1
 
         self.prob_mut = mutation_probability # 变异概率
@@ -189,6 +194,9 @@ class GA():
             t = 1 #统计迭代轮数
             counter = 0 #统计未更新的轮数
             while t <= self.iterate:  # 每轮更新迭代
+                # 对适应度进行罚函数处理(更加准确，如果想要保证速度的话可以去除下面的罚函数处理)
+                for i in range(len(pop)):  # 每个个体
+                    pop[i, self.dim] = self.penalty(pop[i, :self.dim]) + pop[i, self.dim]  # 适应度+罚函数值
                 # Sort
                 pop = pop[pop[:, self.dim].argsort()]  # 根据最后一个目标函数进行升序排列
 
@@ -203,7 +211,7 @@ class GA():
 
                 else:  # 有约束条件
                     for i in range(len(pop)):  # 每个个体
-                        if self.penalty(pop[i, :self.dim]) <= 0:  # 判断是否可行解
+                        if self.penalty(pop[i, :self.dim]) <= 0:  # 判断是否可行解(全部小于等于0则说明是可行解)
                             if pop[i, self.dim] < self.best_function:  # 最优解判断
                                 counter = 0
                                 self.best_function = pop[i, self.dim].copy()
@@ -217,7 +225,7 @@ class GA():
 
                 # Report
                 # 记录每轮迭代最优的目标函数值（每次都是历史最优）
-                self.report.append(pop[0, self.dim])
+                self.report.append(self.best_function)
 
                 # 标准化下目标函数 Normalizing objective function
                 normobj = np.zeros(self.pop_s)  # 用于存储修正后的目标函数序列
@@ -261,8 +269,7 @@ class GA():
                 pop = np.array([np.zeros(self.dim + 1)] * self.pop_s)
 
                 # 将事先已经通过精英筛选和轮盘赌法后的优秀父代保留
-                for k in range(0, self.par_s):
-                    pop[k] = par[k].copy()
+                pop[:self.par_s] = par.copy()
 
                 # 利用筛选的父代进行交叉、变异操作并和选择的优秀父代共同形成新一代
                 for k in range(self.par_s, self.pop_s, 2):  # 步长为2，每轮都会生成2个子代
@@ -288,7 +295,7 @@ class GA():
                     obj = self.sim(ch2)
                     solo[self.dim] = obj
                     pop[k + 1] = solo.copy()
-                pbar.update(1)
+                pbar.update(1)#pbar进行更新
 
                 t += 1  # 迭代轮数+1
                 if counter > self.mniwi:  # 看是否超过最大未更新最优适应度轮数
@@ -314,7 +321,7 @@ class GA():
                     break
 
         # 记录当前最优解Report
-        self.report.append(pop[0, self.dim])
+        self.report.append(self.best_function)
 
         # 输出字典
         self.output_dict = {'variable': self.best_variable, 'function': \
@@ -348,13 +355,18 @@ class GA():
     def penalty(self, X):  # 根据所有约束条件计算惩罚项
         if self.eq_constraints is not None:  #有等式约束时
             eq_cons_output = self.eq_constraints(X)  # 输出约束条件值
-            #将等式约束拆分成两个不等式约束（小于等于）
-            eq_cons_output= [output-self.eq_cons_coefficient-self.eq_cons_coefficient*2*i
-                             for i in range(2)
-                             for output in eq_cons_output]
+            #将等式约束拆分成两个不等式约束（一个小于等于，一个大于等于），这个更加标准，但是迭代到最优解有点慢(硬约束)
+            if self.eq_optimezer=='hard':
+                eq_cons_output= [output-self.eq_cons_coefficient for output in eq_cons_output]+[-output-self.eq_cons_coefficient for output in eq_cons_output]
+            #下面的更快更准（但是可能有时候会有问题）
+            else:
+                eq_cons_output= [output-self.eq_cons_coefficient-self.eq_cons_coefficient*2*i
+                                 for i in range(2)
+                                 for output in eq_cons_output]
             eq_conpare_matrix = np.zeros((len(eq_cons_output), 2))
             eq_conpare_matrix[:, 1] = eq_cons_output
-            eq_penalty=self.penalty_factor * np.sum(np.max(eq_conpare_matrix, axis=1))
+            eq_penalty=self.penalty_factor * np.sum(np.max(eq_conpare_matrix, axis=1)) #注意python中对于极小的大于等于0的数也是默认于0的所以这样来限制，self.penalty_factor也是用来放缩的权重
+
         else:
             eq_penalty=0
 
@@ -366,10 +378,10 @@ class GA():
         else:
             ineq_penalty=0
 
-        if self.eq_constraints is not None or self.ineq_constraints is not None:  # 有约束条件时
+        if self.eq_constraints is not None or self.ineq_constraints is not None:  # 没有约束条件时
             return eq_penalty+ineq_penalty
         else:
-            return None
+            return 0
 
     def cross(self, x, y, c_type):  # 交叉
 
